@@ -70,6 +70,8 @@ store all three credentials in the config file, in which case you will not be
 prompted at all. However, for security reasons, that’s probably a
 bad idea.
 
+**Note**: The PIN is unrelated to your ATM card PIN.
+
 **Warning**: `~/.natwest.yaml` should be `chmod 600`.
 
 ## Bugs
