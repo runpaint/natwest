@@ -14,7 +14,7 @@ end
 
 credentials = YAML.load(File.read(CONFIG)) rescue {}
 
-['Customer number', 'PIN', 'password'].each do |credential|
+['customer number', 'PIN', 'password'].each do |credential|
   key = credential.tr(' ','_').downcase.to_sym
   next if credentials.key?(key)
   unless $stdin.tty? and $stdout.tty?
