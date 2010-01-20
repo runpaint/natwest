@@ -35,14 +35,14 @@ information, balance, and recent transactions.
 The login procedure for [nwolb.com](https://nwolb.com/) is pure security
 theatre. It requires:
 
-* Spoofing your useragent unless using I.E or Chrome.  Entering your customer
-* number, then clicking "Log in".  Determining three specific digits of your
-* PIN, then entering them in individual form
-fields.
-* Determining three specific characters of your password, then entering them in
-* individual form
-fields.
-* Clicking "Next".  Confirming your last login details then clicking "Next".
+* Spoofing your useragent unless using I.E or Chrome.
+* Entering your customer number, then clicking "Log in".
+* Determining three specific digits of your PIN, then entering them in
+individual form fields.
+* Determining three specific characters of your password, then entering them
+in individual form fields.
+* Clicking "Next".
+* Confirming your last login details then clicking "Next".
 
 (For extra difficulty, the last "Next" button is positioned under a series of
 three images: if you click on it before the images have loaded, you're likely
