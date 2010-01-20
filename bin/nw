@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+require 'natwest'
+require 'highline/import'
+
+CONFIG = File.expand_path("~/.natwest.yaml")
+
+if File.exists?(CONFIG) 
+  if File.world_readable?(CONFIG) or not File.owned?(CONFIG)
+    mode = File.stat(CONFIG).mode.to_s(8)
+    $stderr.puts "#{CONFIG}: Insecure permissions: #{mode}"
+  end
+end
+
+credentials = YAML.load(File.read(CONFIG)) rescue {}
+
+['Customer number', 'PIN', 'password'].each do |credential|
+  key = credential.tr(' ','_').downcase.to_sym
+  next if credentials.key?(key)
+  unless $stdin.tty? and $stdout.tty?
+    $stderr.puts "Can't prompt for credentials; STDIN or STDOUT is not a TTY"
+    exit(1)
+  end
+  credentials[key] = ask("Please enter your #{credential}:") do |q| 
+    q.echo = false
+  end
+end
+
+Natwest::Account.new.tap do |nw|
+  nw.login credentials
+  puts "#{nw.account_number} (#{nw.sort_code}) " +
+       "balance: #{nw.balance}; available: #{nw.available}"
+  puts "Recent Transactions:"
+  nw.recent_transactions.each do |trans|
+    amount = trans[:credit] ? "+#{trans[:credit]}" : "-#{trans[:debit]}"
+    puts "#{trans[:date]}: #{amount}"
+    puts "\t" + trans[:details]
+  end
+end
