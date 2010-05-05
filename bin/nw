@@ -26,14 +26,18 @@ credentials = YAML.load(File.read(CONFIG)) rescue {}
   end
 end
 
-Natwest::Account.new.tap do |nw|
+Natwest::Customer.new.tap do |nw|
   nw.login credentials
-  puts "#{nw.account_number} (#{nw.sort_code}) " +
-       "balance: #{nw.balance}; available: #{nw.available}"
-  puts "\nRecent Transactions:"
-  nw.recent_transactions.each do |trans|
-    amount = trans[:credit] ? "+#{trans[:credit]}" : "-#{trans[:debit]}"
-    puts "#{trans[:date]}: #{amount}"
-    puts "\t" + trans[:details]
+  nw.accounts.each do |acc|
+    puts '###'
+    puts "#{acc.name} [#{acc.number}; #{acc.sort_code}] " +
+       "balance: #{acc.balance}; available: #{acc.available}"
+    puts "\nRecent Transactions:"
+    acc.transactions.each do |trans|
+      amount = trans[:credit] ? "+#{trans[:credit]}" : "-#{trans[:debit]}"
+      puts "#{trans[:date]}: #{amount}"
+      puts "\t" + trans[:details]
+    end
+    puts
   end
 end

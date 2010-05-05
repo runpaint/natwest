@@ -64,7 +64,7 @@ module Natwest
     end
   end
 
-  class Account
+  class Customer
     include Login
     NO_DETAILS = 'No further transaction details held'
     attr_accessor :page
@@ -73,40 +73,29 @@ module Natwest
       @ua = Mechanize.new {|ua| ua.user_agent_alias = 'Windows IE 7'}
     end
 
-    def meta_row(field=nil)
-      assert(logged_in?, "Not logged in")
-      @meta_row ||= page.parser.
-                    css('table#ctl00_mainContent_Accounts > tbody > tr').
-                    first
-      return @meta_row unless field
-      @meta_row.css("td > span.#{field} > span").first.inner_text.tr(' ','')
-    end
-
-    def account_number
-      meta_row('AccountNumber').to_i
-    end
-
-    def sort_code
-      meta_row('SortCode')
-    end
-
-    def balance
-      meta_row.css('td')[3].inner_text
-    end
-
-    def available
-      meta_row.css('td')[4].inner_text
-    end
-
-    def recent_transactions
-      page.parser.css('table.InnerAccountTable > tbody > tr').map do |tr|
-        transaction = Hash[[:date, :details, :credit, :debit].
-          zip((cells = tr.css('td')).map(&:inner_text))]
-        unless (further = cells[1]['title']) == NO_DETAILS
-          transaction[:details] += " (#{further.squeeze(' ')})"
+    def accounts
+      page.parser.css('table.AccountTable > tbody > tr').each_slice(2).map do |meta, statement|
+        Account.new.tap do |acc|
+          acc.name = meta.at('td > span.AccountName').inner_text
+          acc.number = meta.at('td > span.AccountNumber').inner_text.gsub(/[^\d]/,'')
+          acc.sort_code = meta.at('td > span.SortCode').inner_text.gsub(/[^\d-]/,'')
+          acc.balance = meta.css('td')[-2].inner_text
+          acc.available = meta.css('td')[-1].inner_text
+          acc.transactions = 
+            statement.css('table.InnerAccountTable > tbody > tr').map do |tr|
+            transaction = Hash[[:date, :details, :credit, :debit].
+              zip((cells = tr.css('td')).map(&:inner_text))]
+            unless (further = cells[1]['title']) == NO_DETAILS
+              transaction[:details] += " (#{further.squeeze(' ')})"
+            end
+            Hash[transaction.map{|k,v| [k, v == ' - ' ? nil : v]}]
+          end
         end
-        Hash[transaction.map{|k,v| [k, v == ' - ' ? nil : v]}]
       end
     end
+  end
+
+  class Account 
+    attr_accessor :name, :number, :sort_code, :balance, :available, :transactions
   end
 end
