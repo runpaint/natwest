@@ -70,7 +70,7 @@ module Natwest
     attr_accessor :page
 
     def initialize
-      @ua = WWW::Mechanize.new {|ua| ua.user_agent_alias = 'Windows IE 7'}
+      @ua = Mechanize.new {|ua| ua.user_agent_alias = 'Windows IE 7'}
     end
 
     def meta_row(field=nil)
