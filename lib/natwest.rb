@@ -76,9 +76,9 @@ module Natwest
     def accounts
       page.parser.css('table.AccountTable > tbody > tr').each_slice(2).map do |meta, statement|
         Account.new.tap do |acc|
-          acc.name = meta.at('td > span.AccountName').inner_text
-          acc.number = meta.at('td > span.AccountNumber').inner_text.gsub(/[^\d]/,'')
-          acc.sort_code = meta.at('td > span.SortCode').inner_text.gsub(/[^\d-]/,'')
+          acc.name = meta.at('span.AccountName').inner_text
+          acc.number = meta.at('span.AccountNumber').inner_text.gsub(/[^\d]/,'')
+          acc.sort_code = meta.at('span.SortCode').inner_text.gsub(/[^\d-]/,'')
           acc.balance = meta.css('td')[-2].inner_text
           acc.available = meta.css('td')[-1].inner_text
           acc.transactions = 
