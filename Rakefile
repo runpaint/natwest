@@ -24,7 +24,7 @@ rescue LoadError
 end
 
 require 'rspec/core/rake_task'
-Rspec::Core::RakeTask.new do |spec|
+RSpec::Core::RakeTask.new do |spec|
   spec.ruby_opts = '-r./spec/spec_helper'
 end
 
