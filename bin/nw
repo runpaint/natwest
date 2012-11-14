@@ -2,10 +2,11 @@
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'natwest'
 require 'highline/import'
+require 'yaml'
 
 CONFIG = File.expand_path("~/.natwest.yaml")
 
-if File.exists?(CONFIG) 
+if File.exists?(CONFIG)
   if File.world_readable?(CONFIG) or not File.owned?(CONFIG)
     mode = File.stat(CONFIG).mode.to_s(8)
     $stderr.puts "#{CONFIG}: Insecure permissions: #{mode}"
@@ -21,7 +22,7 @@ credentials = YAML.load(File.read(CONFIG)) rescue {}
     $stderr.puts "Can't prompt for credentials; STDIN or STDOUT is not a TTY"
     exit(1)
   end
-  credentials[key] = ask("Please enter your #{credential}:") do |q| 
+  credentials[key] = ask("Please enter your #{credential}:") do |q|
     q.echo = false
   end
 end
