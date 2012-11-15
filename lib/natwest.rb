@@ -9,7 +9,7 @@ end
 
 module Natwest
   URL = 'https://nwolb.com/'
-  
+
   module Login
     attr_reader :ua, :pin
     attr_accessor :password, :pin, :customer_number
@@ -31,24 +31,24 @@ module Natwest
       login_form = ua.get(URL).frames.first.click.forms.first
       login_form['ctl00$mainContent$LI5TABA$DBID_edit'] = customer_number
       self.page = login_form.submit
-      assert(page.title.include?('PIN and Password details'), 
+      assert(page.title.include?('PIN and Password details'),
              "Got '#{page.title}' instead of PIN/Password prompt")
     end
 
     def enter_pin_and_password
       expected = expected('PIN','number') + expected('Password','character')
       self.page = page.forms.first.tap do |form|
-       ('A'..'F').map do |letter| 
-         "ctl00$mainContent$LI6PPE#{letter}_edit"
+       ('A'..'F').map do |letter|
+         "ctl00$mainContent$Tab1$LI6PPE#{letter}_edit"
         end.zip(expected).each {|field, value| form[field] = value}
       end.submit
-      assert(page.title.include?('Last log in confirmation'), 
+      assert(page.title.include?('Last log in confirmation'),
              "Got '#{page.title}' instead of last login confirmation")
     end
 
     def confirm_last_login
       self.page = page.forms.first.submit
-      assert(page.title.include?('Accounts summary'), 
+      assert(page.title.include?('Accounts summary'),
              "Got '#{page.title}' instead of accounts summary")
     end
 
@@ -56,7 +56,7 @@ module Natwest
       page.body.
            scan(/Enter the (\d+)[a-z]{2} #{type}/).
            flatten.map{|i| i.to_i - 1}.tap do |indices|
-        assert(indices.uniq.size == 3, 
+        assert(indices.uniq.size == 3,
                "Unexpected #{credential} characters requested")
         characters = [*send(credential.downcase.to_sym).to_s.chars]
         indices.map! {|i| characters[i]}
@@ -70,7 +70,10 @@ module Natwest
     attr_accessor :page
 
     def initialize
-      @ua = Mechanize.new {|ua| ua.user_agent_alias = 'Windows IE 7'}
+      @ua = Mechanize.new
+
+      ua.user_agent_alias = 'Windows IE 7'
+      ua.verify_mode = 0
     end
 
     def accounts
@@ -81,7 +84,7 @@ module Natwest
           acc.sort_code = meta.at('span.SortCode').inner_text.gsub(/[^\d-]/,'')
           acc.balance = meta.css('td')[-2].inner_text
           acc.available = meta.css('td')[-1].inner_text
-          acc.transactions = 
+          acc.transactions =
             statement.css('table.InnerAccountTable > tbody > tr').map do |tr|
             transaction = Hash[[:date, :details, :credit, :debit].
               zip((cells = tr.css('td')).map(&:inner_text))]
@@ -95,7 +98,7 @@ module Natwest
     end
   end
 
-  class Account 
+  class Account
     attr_accessor :name, :number, :sort_code, :balance, :available, :transactions
   end
 end
