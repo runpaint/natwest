@@ -22,7 +22,7 @@ module Natwest
       credentials.each_pair{|name, value| send("#{name}=".to_sym, value)}
       enter_customer_number
       enter_pin_and_password
-      confirm_last_login
+      #confirm_last_login
       @logged_in = true
     end
 
@@ -31,7 +31,7 @@ module Natwest
       login_form = ua.get(URL).frames.first.click.forms.first
       login_form['ctl00$mainContent$LI5TABA$DBID_edit'] = customer_number
       self.page = login_form.submit
-      assert(page.title.include?('PIN and Password details'),
+      assert(page.title.include?('PIN and password details'),
              "Got '#{page.title}' instead of PIN/Password prompt")
     end
 
@@ -42,13 +42,7 @@ module Natwest
          "ctl00$mainContent$Tab1$LI6PPE#{letter}_edit"
         end.zip(expected).each {|field, value| form[field] = value}
       end.submit
-      assert(page.title.include?('Last log in confirmation'),
-             "Got '#{page.title}' instead of last login confirmation")
-    end
-
-    def confirm_last_login
-      self.page = page.forms.first.submit
-      assert(page.title.include?('Accounts summary'),
+      assert(page.title.include?('Account summary'),
              "Got '#{page.title}' instead of accounts summary")
     end
 

@@ -23,7 +23,7 @@ credentials = YAML.load(File.read(CONFIG)) rescue {}
     exit(1)
   end
   credentials[key] = ask("Please enter your #{credential}:") do |q|
-    q.echo = false
+    q.echo = "*"
   end
 end
 
