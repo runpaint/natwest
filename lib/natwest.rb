@@ -22,7 +22,6 @@ module Natwest
       credentials.each_pair{|name, value| send("#{name}=".to_sym, value)}
       enter_customer_number
       enter_pin_and_password
-      #confirm_last_login
       @logged_in = true
     end
 
