@@ -54,7 +54,12 @@ elsif action == "transactions"
   credentials = credential_load
   Natwest::Customer.new.tap do |nw|
     nw.login credentials
-    nw.transactions(ARGV[1], ARGV[2], ARGV[3])
+    transactions = nw.transactions(ARGV[1], ARGV[2], ARGV[3])
+    puts "Transactions for account ending #{ARGV[3]}, between #{ARGV[1]} and #{ARGV[2]}"
+    puts "Date       Description                                                 Amount"
+    transactions.each do |t|
+      puts "#{t[:date]} #{sprintf('%-60.60s',t[:description])} #{sprintf('%9.2f', t[:amount])}"
+    end
   end
 else
  puts "This is a rudimentary API for Natwest Online banking.
