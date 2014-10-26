@@ -10,6 +10,7 @@ information, balance, and recent transactions.
 ## Usage
 
 Get a quick summary:
+    
     $ nw summary
     > Please enter your customer number:
     > Please enter your PIN:
@@ -25,6 +26,7 @@ Get a quick summary:
     ...
 
 Get transactions for one account between 2 dates:
+    
     $ nw transactions 2013-08-01 2014-10-26 123
     Transactions for account ending 123, between 2013-08-01 and 2014-10-26
     Date       Description                                                 Amount
