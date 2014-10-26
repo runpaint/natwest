@@ -4,41 +4,73 @@ require 'natwest'
 require 'highline/import'
 require 'yaml'
 
-CONFIG = File.expand_path("~/.natwest.yaml")
+def credential_load
+  config = File.expand_path("~/.natwest.yaml")
 
-if File.exists?(CONFIG)
-  if File.world_readable?(CONFIG) or not File.owned?(CONFIG)
-    mode = File.stat(CONFIG).mode.to_s(8)
-    $stderr.puts "#{CONFIG}: Insecure permissions: #{mode}"
-  end
-end
-
-credentials = YAML.load(File.read(CONFIG)) rescue {}
-
-['customer number', 'PIN', 'password'].each do |credential|
-  key = credential.tr(' ','_').downcase.to_sym
-  next if credentials.key?(key)
-  unless $stdin.tty? and $stdout.tty?
-    $stderr.puts "Can't prompt for credentials; STDIN or STDOUT is not a TTY"
-    exit(1)
-  end
-  credentials[key] = ask("Please enter your #{credential}:") do |q|
-    q.echo = "*"
-  end
-end
-
-Natwest::Customer.new.tap do |nw|
-  nw.login credentials
-  nw.accounts.each do |acc|
-    puts '###'
-    puts "#{acc.name} [#{acc.number}; #{acc.sort_code}] " +
-       "balance: #{acc.balance}; available: #{acc.available}"
-    puts "\nRecent Transactions:"
-    acc.transactions.each do |trans|
-      amount = trans[:credit] ? "+#{trans[:credit]}" : "-#{trans[:debit]}"
-      puts "#{trans[:date]}: #{amount}"
-      puts "\t" + trans[:details]
+  if File.exists?(config)
+    if File.world_readable?(config) or not File.owned?(config)
+      mode = File.stat(config).mode.to_s(8)
+      $stderr.puts "#{config}: Insecure permissions: #{mode}"
     end
-    puts
   end
+
+  credentials = YAML.load(File.read(config)) rescue {}
+
+  ['customer number', 'PIN', 'password'].each do |credential|
+    key = credential.tr(' ','_').downcase.to_sym
+    next if credentials.key?(key)
+    unless $stdin.tty? and $stdout.tty?
+      $stderr.puts "Can't prompt for credentials; STDIN or STDOUT is not a TTY"
+      exit(1)
+    end
+    credentials[key] = ask("Please enter your #{credential}:") do |q|
+      q.echo = "*"
+    end
+  end
+
+  return credentials
+end
+
+action = ARGV[0]
+
+if action == "summary"
+  credentials = credential_load
+  Natwest::Customer.new.tap do |nw|
+    nw.login credentials
+    nw.accounts.each do |acc|
+      puts '###'
+      puts "#{acc.name} [#{acc.number}; #{acc.sort_code}] " +
+         "balance: #{acc.balance}; available: #{acc.available}"
+      puts "\nRecent Transactions:"
+      acc.transactions.each do |trans|
+        amount = trans[:credit] ? "+#{trans[:credit]}" : "-#{trans[:debit]}"
+        puts "#{trans[:date]}: #{amount}"
+        puts "\t" + trans[:details]
+      end
+      puts
+    end
+  end
+elsif action == "transactions"
+  credentials = credential_load
+  Natwest::Customer.new.tap do |nw|
+    nw.login credentials
+    nw.transactions(ARGV[1], ARGV[2], ARGV[3])
+  end
+else
+ puts "This is a rudimentary API for Natwest Online banking.
+  https://github.com/laycat/natwest
+  
+  Usage:
+  nw <command>
+
+  Commands:
+    summary
+      Displays an account summary and recent transactions
+    transactions <start date> <end date> <account>
+      Gets transactions between two dates for an account. Dates are parsed by ruby
+      (so can be any format parsable by Date.parse), account is the 3 last digits
+      of the account or credit card number.
+
+  For more information see the README:
+  https://github.com/laycat/natwest/blob/master/README.markdown"
 end
