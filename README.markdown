@@ -9,7 +9,9 @@ information, balance, and recent transactions.
 
 ## Usage
 
-    $ nw
+Get a quick summary:
+    
+    $ nw summary
     > Please enter your customer number:
     > Please enter your PIN:
     > Please enter your password:
@@ -21,14 +23,36 @@ information, balance, and recent transactions.
       Cash Withdrawal (LLOYDS BANK 15JAN)
     18 Jan 2010: -£20.00
       Cash Withdrawal (LLOYDS BANK 17JAN)
-    19 Jan 2010: -£45.00
-      OnLine Transaction (CALL REF.NO. 1234 LOANSHARK FP 19/01/10 10)
-    19 Jan 2010: -£49.99
-      Debit Card Transaction (1234 18JAN10 EXAMPLE.COM 0800 123 4567 GB)
-    20 Jan 2010: +£2,000.00
-      Automated Credit
-    20 Jan 2010: +£38.83
-      Automated Credit
+    ...
+
+Get transactions for one account between 2 dates:
+    
+    $ nw transactions 2013-08-01 2014-10-26 123
+    Transactions for account ending 123, between 2013-08-01 and 2014-10-26
+    Date       Description                                                 Amount
+    2014-10-21 4371 20OCT14 , NATIONAL LOTTERY , INTE , WATFORD GB             -10.00
+    2014-10-20 4371 17OCT14 , KATZENJAMMERS , LONDON GB                        -10.30
+    2014-10-20 MOBILE PAYMENT , FROM 07123456789                                50.00
+    2014-10-17 HSBC 17OCT                                                      -30.00
+    ...
+
+Hooking into the ./lib/natwest.rb methods is very easy: the transactions method
+for example returns an array of transactions, each one a hash of the date, description
+and amount:
+    
+    [
+      [ 0] {
+                 :date => #<Date: 2014-10-21 ((2456952j,0s,0n),+0s,2299161j)>,
+          :description => "4371 20OCT14 , NATIONAL LOTTERY , INTE , WATFORD GB",
+               :amount => -10.0
+      },
+      [ 1] {
+                 :date => #<Date: 2014-10-20 ((2456951j,0s,0n),+0s,2299161j)>,
+          :description => "4371 17OCT14 , KATZENJAMMERS , LONDON GB",
+               :amount => -10.3
+      }
+    ]
+
 
 ## Purpose
 
@@ -77,5 +101,6 @@ bad idea.
 ## Bugs
 
 This utility relies on screen-scraping multiple pages of horrendous HTML.
-Further, it has only been tested with one account. Feel free to report errors,
-preferably with the HTML, appropriately sanitised, on which it fails.
+Further, it has only been tested with one online account (with one current account
+and one credit card). Feel free to report errors, preferably with the HTML, 
+appropriately sanitised, on which it fails.
